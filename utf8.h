@@ -6,76 +6,123 @@
 #include <stddef.h>
 
 /**
- * invalid case => "hello\xC0\xC0" => { .valid = false, .valid_upto = 5 }
- * valid case   => "hello world"   => { .valid = true,  .valud_upto = 11 }
+ * @brief Represents the validity of a UTF-8 encoded string.
+ *
+ * @details The `utf8_validity` struct indicates whether a given UTF-8 encoded string is valid or not,
+ * along with the position up to which it is valid.
+ *
+ * - Invalid case: "hello\xC0\xC0" => { .valid = false, .valid_upto = 5  }
+ * - Valid case:   "hello world"   => { .valid = true,  .valid_upto = 11 }
  */
 typedef struct {
-    bool valid;
-    size_t valid_upto;
+    bool valid;          ///< Flag indicating the validity of the UTF-8 string.
+    size_t valid_upto;   ///< The position up to which the string is valid.
 } utf8_validity;
 
+/**
+ * @brief Represents a UTF-8 encoded string.
+ *
+ * @details The `utf8_string` struct holds a pointer to a UTF-8 encoded string along with its byte length,
+ */
 typedef struct {
-    const char* str;
-    size_t byte_len; // excluding terminating '\0'
+    const char* str;     ///< Pointer to the UTF-8 encoded string.
+    size_t byte_len;     ///< Byte length of the UTF-8 string ('\0' not counted).
 } utf8_string;
 
+/**
+ * @brief Represents a slice of a UTF-8 encoded string.
+ *
+ * @details The `utf8_string_slice` struct represents a substring of a UTF-8 encoded string,
+ * specified by a starting char ptr and a byte length.
+ */
 typedef struct {
-    const char* str;
-    size_t byte_len;
+    const char* str;     ///< Pointer to the start of the UTF-8 string slice.
+    size_t byte_len;     ///< Byte length of the UTF-8 string slice (not counting '\0' if the slice is till the end of string).
 } utf8_string_slice;
 
+/**
+ * @brief Represents an iterator for traversing UTF-8 characters in a string.
+ *
+ * @details The `utf8_char_iter` struct serves as an iterator for traversing UTF-8 characters
+ * within a UTF-8 encoded string.
+ */
 typedef struct {
-    const char* str;
+    const char* str;     ///< Pointer to the current position of the iterator.
 } utf8_char_iter;
 
+/**
+ * @brief Represents a UTF-8 character.
+ *
+ * @details The `utf8_char` struct encapsulates a UTF-8 character, including its pointer and byte length.
+ * The byte length represents the number of bytes occupied by the UTF-8 character.
+ */
 typedef struct {
-    const char* str;
-    uint8_t byte_len; // utf8 char can be upto 4 bytes
+    const char* str;     ///< Pointer to the UTF-8 character.
+    uint8_t byte_len;    ///< Byte length of the UTF-8 character.
 } utf8_char;
 
 /**
- * checks if given char ptr is utf8 compliant. terminating null byte is preserved.
- * O(n) time
+ * @brief Validates whether a given string is UTF-8 compliant in O(n) time.
+ *
+ * @param str The input string to validate.
+ * @return The validity of the UTF-8 string along with the position up to which it is valid.
  */
 utf8_validity validate_utf8(const char* str);
 
 /**
- * wraps the char ptr `str` in `utf8_string`, after verifying (see validate_utf8()) the string is utf8
- * if not utf8, it will return { .str = NULL, .byte_len = 0 }.
+ * @brief Wraps a C-style string in a UTF-8 string structure after verifying its UTF-8 compliance.
  *
- * Example:
+ * @param str The input C-style string to wrap.
+ * @return A UTF-8 string structure containing the wrapped string if valid; otherwise, a structure with NULL string pointer.
  *
- * char *s = "definitely utf8 string こんにちは नमस्ते Здравствуйте";
- * utf8_string us = make_utf8_string(s);
- * assert(us.str != NULL);
+ * @code
+ * // Example usage:
+ * const char *str = "definitely utf8 string こんにちは नमस्ते Здравствуйте";
+ * utf8_string ustr = make_utf8_string(str);
+ * assert( ustr.str != NULL );
  *
- * char *s = "non-utf8 sequence -> \xC0\xC0";
- * utf8_string us = make_utf8_string(s);
- * assert(us.str == NULL);
+ * const char *s = "non-utf8 sequence \xC0\xC0";
+ * utf8_string ustr = make_utf8_string(str);
+ * assert( ustr.str == NULL );
+ * @endcode
  */
 utf8_string make_utf8_string(const char* str);
 
 /**
- * returns utf8_string_slice if the byte slice between the range [offset, offset + byte_len) is also utf8
- * retruns { .str = NULL, .byte_len = 0 } for any failure reason (bounds checks fail)
+ * @brief Creates a UTF-8 string slice from a specified range of bytes in the original string.
  *
- * NOTE:
- * if `byte_index` + `byte_len` >= strlen(ustr.str) then only chars till terminating '\0' are considered.
+ * @param ustr The original UTF-8 string.
+ * @param byte_index The starting byte index of the slice.
+ * @param byte_len The byte length of the slice.
+ * @return A UTF-8 string slice representing the specified byte range [offset, offset + byte_len) if valid; otherwise { .str = NULL, .byte_len = 0 }
+ *
+ * @note if `byte_index` + `byte_len` >= strlen(ustr.str) then only chars till terminating '\0' are considered.
  */
 utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t byte_index, size_t byte_len);
 
 /**
- * returns a utf8 character iterator
- * call the next_utf8_char() with iterator as input to get the next utf8 char
+ * @brief Creates an iterator for traversing UTF-8 characters within a string. (see next_utf8_char( .. ) for traversal)
+ *
+ * @param ustr The UTF-8 string to iterate over.
+ * @return An iterator structure initialized to the start of the string.
  */
 utf8_char_iter make_utf8_char_iter(utf8_string ustr);
 
 /**
- * returns the next utf8 character.
- * if iterator reaches its end, it keeps returning { .str = '\0', .byte_len = 0 }
+ * @brief Retrieves the next UTF-8 character from the iterator.
+ *
+ * @param iter Pointer to the UTF-8 character iterator.
+ * @return The next UTF-8 character from the iterator.
+ * @note If the iterator reaches the end, it keeps returning { .str = '\0', .byte_len = 0 }
  */
 utf8_char next_utf8_char(utf8_char_iter* iter);
 
+/**
+ * @brief Checks if a given byte is the start of a UTF-8 character. ('\0' is also a valid character boundary)
+ *
+ * @param str Pointer to the byte to check.
+ * @return `true` if the byte is the start of a UTF-8 character; otherwise, `false`.
+ */
 bool is_utf8_char_boundary(const char* str);
 
 #endif

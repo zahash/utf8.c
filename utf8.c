@@ -110,11 +110,10 @@ utf8_char next_utf8_char(utf8_char_iter* iter) {
     // iter->str is at the current char's starting byte (char boundary).
     const char* curr_boundary = iter->str;
 
-    // we need to find the next char's starting byte (next char boundary) and set the iter->str to that.
-    // every utf8 char is atleast 1 byte.
     iter->str++;
     uint8_t byte_len = 1;
 
+    // find the next char's starting byte (next char boundary) and set the iter->str to that.
     while (!is_utf8_char_boundary(iter->str)) {
         iter->str++;
         byte_len++;
