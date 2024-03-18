@@ -5,35 +5,22 @@ typedef struct {
     size_t next_offset;
 } utf8_char_validity;
 
-utf8_char_validity validate_utf8_1b_char(const char* str, size_t offset) {
+utf8_char_validity validate_utf8_char(const char* str, size_t offset) {
     // Single-byte UTF-8 characters have the form 0xxxxxxx
     if (((uint8_t)str[offset] & 0b10000000) == 0b00000000)
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 1 };
 
-    return (utf8_char_validity) { .valid = false, .next_offset = offset };
-}
-
-utf8_char_validity validate_utf8_2b_char(const char* str, size_t offset) {
     // Two-byte UTF-8 characters have the form 110xxxxx 10xxxxxx
-
     if (((uint8_t)str[offset + 0] & 0b11100000) == 0b11000000
         && ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000)
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 2 };
 
-    return (utf8_char_validity) { .valid = false, .next_offset = offset };
-}
-
-utf8_char_validity validate_utf8_3b_char(const char* str, size_t offset) {
     // Three-byte UTF-8 characters have the form 1110xxxx 10xxxxxx 10xxxxxx
     if (((uint8_t)str[offset + 0] & 0b11110000) == 0b11100000
         && ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000
         && ((uint8_t)str[offset + 2] & 0b11000000) == 0b10000000)
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 3 };
 
-    return (utf8_char_validity) { .valid = false, .next_offset = offset };
-}
-
-utf8_char_validity validate_utf8_4b_char(const char* str, size_t offset) {
     // Four-byte UTF-8 characters have the form 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
     if ((str[offset + 0] & 0b11111000) == 0b11110000
         && (str[offset + 1] & 0b11000000) == 0b10000000
@@ -42,24 +29,6 @@ utf8_char_validity validate_utf8_4b_char(const char* str, size_t offset) {
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 4 };
 
     return (utf8_char_validity) { .valid = false, .next_offset = offset };
-}
-
-utf8_char_validity validate_utf8_char(const char* str, size_t offset) {
-    utf8_char_validity char_validity;
-
-    char_validity = validate_utf8_1b_char(str, offset);
-    if (char_validity.valid) return char_validity;
-
-    char_validity = validate_utf8_2b_char(str, offset);
-    if (char_validity.valid) return char_validity;
-
-    char_validity = validate_utf8_3b_char(str, offset);
-    if (char_validity.valid) return char_validity;
-
-    char_validity = validate_utf8_4b_char(str, offset);
-    if (char_validity.valid) return char_validity;
-
-    return char_validity;
 }
 
 utf8_validity validate_utf8(const char* str) {
