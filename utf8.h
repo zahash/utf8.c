@@ -120,6 +120,26 @@ utf8_char_iter make_utf8_char_iter(utf8_string ustr);
 utf8_char next_utf8_char(utf8_char_iter* iter);
 
 /**
+ * @brief Retrieves the UTF-8 character at the specified character index within a UTF-8 string in O(n) time.
+ *
+ * @details The `nth_utf8_char` function returns the UTF-8 character located at the specified character index
+ * within the given UTF-8 string. The character index is zero-based, indicating the position of
+ * the character in the string. If the index is out of bounds or invalid, the function returns
+ * { .str = NULL, .byte_len = 0 }
+ *
+ * @param ustr The UTF-8 string from which to retrieve the character.
+ * @param char_index The zero-based index of the character to retrieve.
+ * @return The UTF-8 character at the specified index within the string.
+ *
+ * @code
+ * // Example usage:
+ * utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
+ * utf8_char char_at_index = nth_utf8_char(str, 7);    // д
+ * @endcode
+ */
+utf8_char nth_utf8_char(utf8_string ustr, size_t char_index);
+
+/**
  * @brief Checks if a given byte is the start of a UTF-8 character. ('\0' is also a valid character boundary)
  *
  * @param str Pointer to the byte to check.

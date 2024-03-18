@@ -89,3 +89,13 @@ utf8_char next_utf8_char(utf8_char_iter* iter) {
 
     return (utf8_char) { .str = curr_boundary, .byte_len = byte_len };
 }
+
+utf8_char nth_utf8_char(utf8_string ustr, size_t char_index) {
+    utf8_char_iter iter = make_utf8_char_iter(ustr);
+
+    utf8_char ch;
+    while ((ch = next_utf8_char(&iter)).byte_len != 0 && char_index-- != 0) {}
+
+    if (ch.byte_len == 0) return (utf8_char) { .str = NULL, .byte_len = 0 };
+    return ch;
+}

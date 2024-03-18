@@ -40,28 +40,28 @@ void test_make_utf8_string_slice_ok() {
   assert(strncmp(slice.str, "Здравствуйте", slice.byte_len) == 0);
 }
 
-void test_make_utf8_string_slice_ok_start_out_of_bounds() {
+void test_make_utf8_string_slice_start_out_of_bounds_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
   utf8_string_slice slice = make_utf8_string_slice(str, 1000, 1);
   assert(slice.byte_len == 0);
   assert(strcmp(slice.str, "") == 0);
 }
 
-void test_make_utf8_string_slice_ok_end_out_of_bounds() {
+void test_make_utf8_string_slice_end_out_of_bounds_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
   utf8_string_slice slice = make_utf8_string_slice(str, 6, 1000);
   assert(slice.byte_len == 12 * 2 + 1 + 5 * 3);
   assert(strncmp(slice.str, "Здравствуйте こんにちは", slice.byte_len) == 0);
 }
 
-void test_make_utf8_string_slice_err_start_non_boundary() {
+void test_make_utf8_string_slice_start_non_boundary_err() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
   utf8_string_slice slice = make_utf8_string_slice(str, 7, 3);
   assert(slice.str == NULL);
   assert(slice.byte_len == 0);
 }
 
-void test_make_utf8_string_slice_err_end_non_boundary() {
+void test_make_utf8_string_slice_end_non_boundary_err() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
   utf8_string_slice slice = make_utf8_string_slice(str, 6, 3);
   assert(slice.str == NULL);
@@ -107,21 +107,64 @@ void test_is_utf8_char_boundary() {
   assert(strcmp(++str, "") == 0);
 }
 
+void test_nth_utf8_char_valid_index_ok() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは");
+  utf8_char ch = nth_utf8_char(ustr, 20);
+  assert(ch.byte_len == 3);
+  assert(strncmp(ch.str, "ん", ch.byte_len) == 0);
+}
+
+void test_nth_utf8_char_first_index_ok() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは");
+  utf8_char ch = nth_utf8_char(ustr, 0);
+  assert(ch.byte_len == 1);
+  assert(*ch.str == 'H');
+}
+
+void test_nth_utf8_char_last_index_ok() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは");
+  utf8_char ch = nth_utf8_char(ustr, 23);
+  assert(ch.byte_len == 3);
+  assert(strncmp(ch.str, "は", ch.byte_len) == 0);
+}
+
+void test_nth_utf8_char_invalid_index_err() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは");
+  utf8_char ch = nth_utf8_char(ustr, 100);
+  assert(ch.str == NULL);
+  assert(ch.byte_len == 0);
+}
+
+void test_nth_utf8_char_empty_string_err() {
+  utf8_string ustr = make_utf8_string("");
+  utf8_char ch = nth_utf8_char(ustr, 0);
+  assert(ch.str == NULL);
+  assert(ch.byte_len == 0);
+}
+
 int ntests = 0;
 #define TEST(test_fn) test_fn(); ntests++; printf("%s\n", #test_fn);
 
 int main() {
+  unsigned int c = 0;
+  printf("%d\n", --c == 0);
+
   TEST(test_validate_utf8_ok);
   TEST(test_validate_utf8_err);
   TEST(test_make_utf8_string_ok);
   TEST(test_make_utf8_string_err);
   TEST(test_make_utf8_string_slice_ok);
-  TEST(test_make_utf8_string_slice_ok_start_out_of_bounds);
-  TEST(test_make_utf8_string_slice_ok_end_out_of_bounds);
-  TEST(test_make_utf8_string_slice_err_start_non_boundary);
-  TEST(test_make_utf8_string_slice_err_end_non_boundary);
+  TEST(test_make_utf8_string_slice_start_out_of_bounds_ok);
+  TEST(test_make_utf8_string_slice_end_out_of_bounds_ok);
+  TEST(test_make_utf8_string_slice_start_non_boundary_err);
+  TEST(test_make_utf8_string_slice_end_non_boundary_err);
   TEST(test_utf8_char_iter);
   TEST(test_is_utf8_char_boundary);
+  TEST(test_nth_utf8_char_valid_index_ok);
+  TEST(test_nth_utf8_char_first_index_ok);
+  TEST(test_nth_utf8_char_last_index_ok);
+  TEST(test_nth_utf8_char_invalid_index_err);
+  TEST(test_nth_utf8_char_empty_string_err);
 
   printf("\n** %d tests passed **\n", ntests);
   return 0;
