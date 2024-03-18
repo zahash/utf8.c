@@ -91,15 +91,15 @@ bool is_utf8_char_boundary(const char* str) {
     return (uint8_t)*str <= 0b01111111 || (uint8_t)*str >= 0b11000000;
 }
 
-utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t byte_index, size_t byte_len) {
-    if (byte_index >= ustr.byte_len || byte_len == 0)
+utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t start_byte_index, size_t byte_len) {
+    if (start_byte_index >= ustr.byte_len || byte_len == 0)
         return (utf8_string_slice) { .str = NULL, .byte_len = 0 };
 
-    size_t end = byte_index + byte_len;
-    if (end >= ustr.byte_len) end = ustr.byte_len;
+    size_t excl_end_byte_index = start_byte_index + byte_len;
+    if (excl_end_byte_index > ustr.byte_len) excl_end_byte_index = ustr.byte_len;
 
-    if (is_utf8_char_boundary(ustr.str + end))
-        return (utf8_string_slice) { .str = ustr.str + byte_index, .byte_len = end - byte_index };
+    if (is_utf8_char_boundary(ustr.str + start_byte_index) && is_utf8_char_boundary(ustr.str + excl_end_byte_index))
+        return (utf8_string_slice) { .str = ustr.str + start_byte_index, .byte_len = excl_end_byte_index - start_byte_index };
 
     return (utf8_string_slice) { .str = NULL, .byte_len = 0 };
 }
