@@ -146,9 +146,6 @@ int ntests = 0;
 #define TEST(test_fn) test_fn(); ntests++; printf("%s\n", #test_fn);
 
 int main() {
-  unsigned int c = 0;
-  printf("%d\n", --c == 0);
-
   TEST(test_validate_utf8_ok);
   TEST(test_validate_utf8_err);
   TEST(test_make_utf8_string_ok);

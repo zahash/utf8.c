@@ -99,3 +99,23 @@ utf8_char nth_utf8_char(utf8_string ustr, size_t char_index) {
     if (ch.byte_len == 0) return (utf8_char) { .str = NULL, .byte_len = 0 };
     return ch;
 }
+
+uint32_t unicode_code_point(utf8_char uchar) {
+    switch (uchar.byte_len) {
+    case 1: return uchar.str[0] & 0b01111111;
+    case 2: return
+        (uchar.str[0] & 0b00011111) << 6 |
+        (uchar.str[1] & 0b00111111);
+    case 3: return
+        (uchar.str[0] & 0b00001111) << 12 |
+        (uchar.str[1] & 0b00111111) << 6 |
+        (uchar.str[2] & 0b00111111);
+    case 4: return
+        (uchar.str[0] & 0x00000111) << 18 |
+        (uchar.str[1] & 0b00111111) << 12 |
+        (uchar.str[2] & 0b00111111) << 6 |
+        (uchar.str[3] & 0b00111111);
+    }
+
+    return 0; // unreachable
+}

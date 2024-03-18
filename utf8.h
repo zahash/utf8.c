@@ -147,4 +147,12 @@ utf8_char nth_utf8_char(utf8_string ustr, size_t char_index);
  */
 bool is_utf8_char_boundary(const char* str);
 
+/**
+ * @brief Converts a UTF-8 character to its corresponding Unicode code point.
+ *
+ * @param uchar The UTF-8 character to convert.
+ * @return The Unicode code point.
+ */
+uint32_t unicode_code_point(utf8_char uchar);
+
 #endif
