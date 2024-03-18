@@ -32,7 +32,8 @@ int main() {
 
     utf8_char ch;
     while ((ch = next_utf8_char(&iter)).byte_len > 0) {
-        printf("Next character: %.*s\n", (int)ch.byte_len, ch.str);
+        printf("character: %.*s\t", (int)ch.byte_len, ch.str);
+        printf("Unicode code point: U+%04X\n", unicode_code_point(ch));
     }
 
     return 0;
