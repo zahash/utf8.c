@@ -92,8 +92,7 @@ bool is_utf8_char_boundary(const char* str) {
 }
 
 utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t start_byte_index, size_t byte_len) {
-    if (start_byte_index >= ustr.byte_len || byte_len == 0)
-        return (utf8_string_slice) { .str = NULL, .byte_len = 0 };
+    if (start_byte_index > ustr.byte_len) start_byte_index = ustr.byte_len;
 
     size_t excl_end_byte_index = start_byte_index + byte_len;
     if (excl_end_byte_index > ustr.byte_len) excl_end_byte_index = ustr.byte_len;

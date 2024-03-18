@@ -40,11 +40,11 @@ void test_make_utf8_string_slice_ok() {
   assert(strncmp(slice.str, "Здравствуйте", slice.byte_len) == 0);
 }
 
-void test_make_utf8_string_slice_err_start_out_of_bounds() {
+void test_make_utf8_string_slice_ok_start_out_of_bounds() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは");
   utf8_string_slice slice = make_utf8_string_slice(str, 1000, 1);
-  assert(slice.str == NULL);
   assert(slice.byte_len == 0);
+  assert(strcmp(slice.str, "") == 0);
 }
 
 void test_make_utf8_string_slice_ok_end_out_of_bounds() {
@@ -116,7 +116,7 @@ int main() {
   TEST(test_make_utf8_string_ok);
   TEST(test_make_utf8_string_err);
   TEST(test_make_utf8_string_slice_ok);
-  TEST(test_make_utf8_string_slice_err_start_out_of_bounds);
+  TEST(test_make_utf8_string_slice_ok_start_out_of_bounds);
   TEST(test_make_utf8_string_slice_ok_end_out_of_bounds);
   TEST(test_make_utf8_string_slice_err_start_non_boundary);
   TEST(test_make_utf8_string_slice_err_end_non_boundary);

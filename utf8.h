@@ -94,8 +94,10 @@ utf8_string make_utf8_string(const char* str);
  * @param ustr The original UTF-8 string.
  * @param byte_index The starting byte index of the slice.
  * @param byte_len The byte length of the slice.
- * @return A UTF-8 string slice representing the specified byte range [offset, offset + byte_len) if valid; otherwise { .str = NULL, .byte_len = 0 }
+ * @return A UTF-8 string slice representing the specified byte range [offset, offset + byte_len) if valid (range between UTF-8 char boundaries);
+ * otherwise { .str = NULL, .byte_len = 0 }
  *
+ * @note if `byte_index` >= strlen(ustr.str) then returns terminating '\0' of ustr.str { .str = '\0', .byte_len = 0 }
  * @note if `byte_index` + `byte_len` >= strlen(ustr.str) then only chars till terminating '\0' are considered.
  */
 utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t byte_index, size_t byte_len);
@@ -113,7 +115,7 @@ utf8_char_iter make_utf8_char_iter(utf8_string ustr);
  *
  * @param iter Pointer to the UTF-8 character iterator.
  * @return The next UTF-8 character from the iterator.
- * @note If the iterator reaches the end, it keeps returning { .str = '\0', .byte_len = 0 }
+ * @note If the iterator reaches the end, it keeps returning terminating '\0' of iter.str { .str = '\0', .byte_len = 0 }
  */
 utf8_char next_utf8_char(utf8_char_iter* iter);
 
