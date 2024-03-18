@@ -27,13 +27,13 @@ int main() {
     utf8_string_slice slice = make_utf8_string_slice(ustr, 2, 11);
     utf8_char_iter iter = make_utf8_char_iter(ustr);
 
-    printf("String: %s\n", ustr.str);
-    printf("Slice: %.*s\n", (int)slice.byte_len, slice.str);
+    printf("string: %s\n", ustr.str);
+    printf("slice: %.*s\n", (int)slice.byte_len, slice.str);
 
     utf8_char ch;
     while ((ch = next_utf8_char(&iter)).byte_len > 0) {
         printf("character: %.*s\t", (int)ch.byte_len, ch.str);
-        printf("Unicode code point: U+%04X\n", unicode_code_point(ch));
+        printf("unicode code point: U+%04X\n", unicode_code_point(ch));
     }
 
     return 0;
