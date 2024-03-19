@@ -111,7 +111,7 @@ uint32_t unicode_code_point(utf8_char uchar) {
         (uchar.str[1] & 0b00111111) << 6 |
         (uchar.str[2] & 0b00111111);
     case 4: return
-        (uchar.str[0] & 0x00000111) << 18 |
+        (uchar.str[0] & 0b00000111) << 18 |
         (uchar.str[1] & 0b00111111) << 12 |
         (uchar.str[2] & 0b00111111) << 6 |
         (uchar.str[3] & 0b00111111);

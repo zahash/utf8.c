@@ -142,6 +142,16 @@ void test_nth_utf8_char_empty_string_err() {
   assert(ch.byte_len == 0);
 }
 
+void test_unicode_code_point() {
+  utf8_string ustr = make_utf8_string("A¢日😁");
+  utf8_char_iter iter = make_utf8_char_iter(ustr);
+
+  assert(unicode_code_point(next_utf8_char(&iter)) == 65); // A
+  assert(unicode_code_point(next_utf8_char(&iter)) == 162); // ¢
+  assert(unicode_code_point(next_utf8_char(&iter)) == 26085); // 日
+  assert(unicode_code_point(next_utf8_char(&iter)) == 128513); // 😁
+}
+
 int ntests = 0;
 #define TEST(test_fn) test_fn(); ntests++; printf("%s\n", #test_fn);
 
@@ -162,6 +172,7 @@ int main() {
   TEST(test_nth_utf8_char_last_index_ok);
   TEST(test_nth_utf8_char_invalid_index_err);
   TEST(test_nth_utf8_char_empty_string_err);
+  TEST(test_unicode_code_point);
 
   printf("\n** %d tests passed **\n", ntests);
   return 0;
