@@ -143,12 +143,12 @@ void test_nth_utf8_char_empty_string_err() {
 }
 
 void test_unicode_code_point() {
-  utf8_string ustr = make_utf8_string("A¢日😁");
+  utf8_string ustr = make_utf8_string("Hдこ😁");
   utf8_char_iter iter = make_utf8_char_iter(ustr);
 
-  assert(unicode_code_point(next_utf8_char(&iter)) == 65); // A
-  assert(unicode_code_point(next_utf8_char(&iter)) == 162); // ¢
-  assert(unicode_code_point(next_utf8_char(&iter)) == 26085); // 日
+  assert(unicode_code_point(next_utf8_char(&iter)) == 72); // H
+  assert(unicode_code_point(next_utf8_char(&iter)) == 1076); // д
+  assert(unicode_code_point(next_utf8_char(&iter)) == 12371); // こ
   assert(unicode_code_point(next_utf8_char(&iter)) == 128513); // 😁
 }
 
