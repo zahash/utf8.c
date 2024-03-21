@@ -30,17 +30,6 @@ typedef struct {
 } utf8_string;
 
 /**
- * @brief Represents a slice of a UTF-8 encoded string.
- *
- * @details The `utf8_string_slice` struct represents a substring of a UTF-8 encoded string,
- * specified by a starting char ptr and a byte length.
- */
-typedef struct {
-    const char* str;     ///< Pointer to the start of the UTF-8 string slice.
-    size_t byte_len;     ///< Byte length of the UTF-8 string slice (not counting '\0' if the slice is till the end of string).
-} utf8_string_slice;
-
-/**
  * @brief Represents an iterator for traversing UTF-8 characters in a string.
  *
  * @details The `utf8_char_iter` struct serves as an iterator for traversing UTF-8 characters
@@ -94,13 +83,13 @@ utf8_string make_utf8_string(const char* str);
  * @param ustr The original UTF-8 string.
  * @param byte_index The starting byte index of the slice.
  * @param byte_len The byte length of the slice.
- * @return A UTF-8 string slice representing the specified byte range [offset, offset + byte_len) if valid (range between UTF-8 char boundaries);
+ * @return A UTF-8 string representing the specified byte range [offset, offset + byte_len) if valid (range between UTF-8 char boundaries);
  * otherwise { .str = NULL, .byte_len = 0 }
  *
  * @note if `byte_index` >= strlen(ustr.str) then returns terminating '\0' of ustr.str { .str = '\0', .byte_len = 0 }
  * @note if `byte_index` + `byte_len` >= strlen(ustr.str) then only chars till terminating '\0' are considered.
  */
-utf8_string_slice make_utf8_string_slice(utf8_string ustr, size_t byte_index, size_t byte_len);
+utf8_string slice_utf8_string(utf8_string ustr, size_t byte_index, size_t byte_len);
 
 /**
  * @brief Creates an iterator for traversing UTF-8 characters within a string. (see next_utf8_char( .. ) for traversal)

@@ -105,35 +105,35 @@ void test_make_utf8_string_err() {
 
 void test_make_utf8_string_slice_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
-  utf8_string_slice slice = make_utf8_string_slice(str, 6, 24);
+  utf8_string slice = slice_utf8_string(str, 6, 24);
   assert(slice.byte_len == 12 * 2);
   assert(strncmp(slice.str, "Здравствуйте", slice.byte_len) == 0);
 }
 
 void test_make_utf8_string_slice_start_out_of_bounds_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
-  utf8_string_slice slice = make_utf8_string_slice(str, 1000, 1);
+  utf8_string slice = slice_utf8_string(str, 1000, 1);
   assert(slice.byte_len == 0);
   assert(strcmp(slice.str, "") == 0);
 }
 
 void test_make_utf8_string_slice_end_out_of_bounds_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
-  utf8_string_slice slice = make_utf8_string_slice(str, 6, 1000);
+  utf8_string slice = slice_utf8_string(str, 6, 1000);
   assert(slice.byte_len == 12 * 2 + 1 + 5 * 3 + 1 + 2 * 4);
   assert(strncmp(slice.str, "Здравствуйте こんにちは 🚩😁", slice.byte_len) == 0);
 }
 
 void test_make_utf8_string_slice_start_non_boundary_err() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
-  utf8_string_slice slice = make_utf8_string_slice(str, 7, 3);
+  utf8_string slice = slice_utf8_string(str, 7, 3);
   assert(slice.str == NULL);
   assert(slice.byte_len == 0);
 }
 
 void test_make_utf8_string_slice_end_non_boundary_err() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
-  utf8_string_slice slice = make_utf8_string_slice(str, 6, 3);
+  utf8_string slice = slice_utf8_string(str, 6, 3);
   assert(slice.str == NULL);
   assert(slice.byte_len == 0);
 }
