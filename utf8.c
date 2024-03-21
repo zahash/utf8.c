@@ -11,22 +11,57 @@ utf8_char_validity validate_utf8_char(const char* str, size_t offset) {
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 1 };
 
     // Two-byte UTF-8 characters have the form 110xxxxx 10xxxxxx
-    if (((uint8_t)str[offset + 0] & 0b11100000) == 0b11000000
-        && ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000)
+    if (((uint8_t)str[offset + 0] & 0b11100000) == 0b11000000 &&
+        ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000) {
+
+        // Check for overlong encoding
+        // 0(xxxxxxx)
+        // 0(1111111)
+        // 110(xxxxx) 10(xxxxxx)
+        // 110(00001) 10(111111)
+        // 110(00010) 10(000000)
+        if (((uint8_t)str[offset] & 0b00011111) < 0b00000010)
+            return (utf8_char_validity) { .valid = false, .next_offset = offset };
+
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 2 };
+    }
 
     // Three-byte UTF-8 characters have the form 1110xxxx 10xxxxxx 10xxxxxx
-    if (((uint8_t)str[offset + 0] & 0b11110000) == 0b11100000
-        && ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000
-        && ((uint8_t)str[offset + 2] & 0b11000000) == 0b10000000)
+    if (((uint8_t)str[offset + 0] & 0b11110000) == 0b11100000 &&
+        ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000 &&
+        ((uint8_t)str[offset + 2] & 0b11000000) == 0b10000000) {
+
+        // Check for overlong encoding
+        // 110(xxxxx) 10(xxxxxx)
+        // 110(11111) 10(111111)
+        // 1110(xxxx) 10(xxxxxx) 10(xxxxxx)
+        // 1110(0000) 10(011111) 10(111111)
+        // 1110(0000) 10(100000) 10(000000)
+        if (((uint8_t)str[offset + 0] & 0b00001111) == 0b00000000 &&
+            ((uint8_t)str[offset + 1] & 0b00111111) < 0b00100000)
+            return (utf8_char_validity) { .valid = false, .next_offset = offset };
+
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 3 };
+    }
 
     // Four-byte UTF-8 characters have the form 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-    if ((str[offset + 0] & 0b11111000) == 0b11110000
-        && (str[offset + 1] & 0b11000000) == 0b10000000
-        && (str[offset + 2] & 0b11000000) == 0b10000000
-        && (str[offset + 3] & 0b11000000) == 0b10000000)
+    if (((uint8_t)str[offset + 0] & 0b11111000) == 0b11110000 &&
+        ((uint8_t)str[offset + 1] & 0b11000000) == 0b10000000 &&
+        ((uint8_t)str[offset + 2] & 0b11000000) == 0b10000000 &&
+        ((uint8_t)str[offset + 3] & 0b11000000) == 0b10000000) {
+
+        // Check for overlong encoding
+        // 1110(xxxx) 10(xxxxxx) 10(xxxxxx)
+        // 1110(1111) 10(111111) 10(111111)
+        // 11110(xxx) 10(xxxxxx) 10(xxxxxx) 10(xxxxxx)
+        // 11110(000) 10(001111) 10(111111) 10(111111)
+        // 11110(000) 10(010000) 10(000000) 10(000000)
+        if (((uint8_t)str[offset + 0] & 0b00000111) == 0b00000000 &&
+            ((uint8_t)str[offset + 1] & 0b00111111) < 0b00010000)
+            return (utf8_char_validity) { .valid = false, .next_offset = offset };
+
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 4 };
+    }
 
     return (utf8_char_validity) { .valid = false, .next_offset = offset };
 }

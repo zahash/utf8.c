@@ -15,10 +15,79 @@ void test_validate_utf8_ok() {
   assert(validity.valid_upto == 5 + 1 + 12 * 2 + 1 + 5 * 3 + 1 + 2 * 4);
 }
 
+void test_validate_utf8_boundary_ok() {
+  utf8_validity validity;
+
+  // last 1b -> 0(1111111)
+  validity = validate_utf8("\x7F");
+  assert(validity.valid);
+  assert(validity.valid_upto == 1);
+
+  // first 2b -> 110(00010) 10(000000)
+  validity = validate_utf8("\xC2\x80");
+  assert(validity.valid);
+  assert(validity.valid_upto == 2);
+
+  // last 2b -> 110(11111) 10(111111)
+  validity = validate_utf8("\xDF\xBF");
+  assert(validity.valid);
+  assert(validity.valid_upto == 2);
+
+  // first 3b -> 1110(0000) 10(100000) 10(000000)
+  validity = validate_utf8("\xE0\xA0\x80");
+  assert(validity.valid);
+  assert(validity.valid_upto == 3);
+
+  // last 3b -> 1110(1111) 10(111111) 10(111111)
+  validity = validate_utf8("\xEF\xBF\xBF");
+  assert(validity.valid);
+  assert(validity.valid_upto == 3);
+
+  // first 4b -> 11110(000) 10(010000) 10(000000) 10(000000)
+  validity = validate_utf8("\xF0\x90\x80\x80");
+  assert(validity.valid);
+  assert(validity.valid_upto == 4);
+
+  // last 4b -> 11110(111) 10(111111) 10(111111) 10(111111)
+  validity = validate_utf8("\xF7\xBF\xBF\xBF");
+  assert(validity.valid);
+  assert(validity.valid_upto == 4);
+}
+
 void test_validate_utf8_err() {
   utf8_validity validity = validate_utf8("Hello Здравствуйте\xC0\xC0 こんにちは 🚩😁");
   assert(validity.valid == false);
   assert(validity.valid_upto == 5 + 1 + 12 * 2);
+}
+
+void assert_overlong_encodings(utf8_char actual, utf8_char overlong) {
+  assert(unicode_code_point(actual) == unicode_code_point(overlong));
+
+  utf8_validity validity;
+
+  validity = validate_utf8(actual.str);
+  assert(validity.valid == true);
+  assert(validity.valid_upto == actual.byte_len);
+
+  validity = validate_utf8(overlong.str);
+  assert(validity.valid == false);
+  assert(validity.valid_upto == 0);
+}
+
+void test_validate_utf8_overlong_encoding_err() {
+  assert_overlong_encodings((utf8_char) { .str = "H", .byte_len = 1 }, (utf8_char) { .str = "\xC1\x88", .byte_len = 2 });
+  assert_overlong_encodings((utf8_char) { .str = "H", .byte_len = 1 }, (utf8_char) { .str = "\xE0\x81\x88", .byte_len = 3 });
+  assert_overlong_encodings((utf8_char) { .str = "H", .byte_len = 1 }, (utf8_char) { .str = "\xF0\x80\x81\x88", .byte_len = 4 });
+
+  assert_overlong_encodings((utf8_char) { .str = "д", .byte_len = 2 }, (utf8_char) { .str = "\xE0\x90\xB4", .byte_len = 3 });
+  assert_overlong_encodings((utf8_char) { .str = "д", .byte_len = 2 }, (utf8_char) { .str = "\xF0\x80\x90\xB4", .byte_len = 4 });
+
+  assert_overlong_encodings((utf8_char) { .str = "こ", .byte_len = 3 }, (utf8_char) { .str = "\xF0\x83\x81\x93", .byte_len = 4 });
+
+  // boundary characters
+  assert_overlong_encodings((utf8_char) { .str = "\x7F", .byte_len = 1 }, (utf8_char) { .str = "\xC1\xBF", .byte_len = 2 }); // last 1b, last 1b overlong
+  assert_overlong_encodings((utf8_char) { .str = "\xDF\xBF", .byte_len = 2 }, (utf8_char) { .str = "\xE0\x9F\xBF", .byte_len = 3 }); // last 2b, last 2b overlong
+  assert_overlong_encodings((utf8_char) { .str = "\xEF\xBF\xBF", .byte_len = 3 }, (utf8_char) { .str = "\xF0\x8F\xBF\xBF", .byte_len = 4 }); // last 3b, last 3b overlong
 }
 
 void test_make_utf8_string_ok() {
@@ -170,7 +239,9 @@ int ntests = 0;
 
 int main() {
   TEST(test_validate_utf8_ok);
+  TEST(test_validate_utf8_boundary_ok);
   TEST(test_validate_utf8_err);
+  TEST(test_validate_utf8_overlong_encoding_err);
   TEST(test_make_utf8_string_ok);
   TEST(test_make_utf8_string_err);
   TEST(test_make_utf8_string_slice_ok);
