@@ -41,6 +41,14 @@ utf8_char_validity validate_utf8_char(const char* str, size_t offset) {
             ((uint8_t)str[offset + 1] & 0b00111111) < 0b00100000)
             return (utf8_char_validity) { .valid = false, .next_offset = offset };
 
+        // Reject UTF-16 surrogates
+        // U+D800 to U+DFFF
+        // 1110(1101) 10(100000) 10(000000) ED A0 80 to 1110(1101) 10(111111) 10(111111) ED BF BF
+        if ((uint8_t)str[offset + 0] == 0b11101101 &&
+            (uint8_t)str[offset + 1] >= 0b10100000 &&
+            (uint8_t)str[offset + 1] <= 0b10111111)
+            return (utf8_char_validity) { .valid = false, .next_offset = offset };
+
         return (utf8_char_validity) { .valid = true, .next_offset = offset + 3 };
     }
 

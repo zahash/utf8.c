@@ -54,6 +54,26 @@ void test_validate_utf8_boundary_ok() {
   assert(validity.valid_upto == 4);
 }
 
+void test_surrogate_rejection() {
+  utf8_validity validity;
+
+  validity = validate_utf8("\xED\xA0\x80");
+  assert(validity.valid == false);
+  assert(validity.valid_upto == 0);
+
+  validity = validate_utf8("\xED\xAC\x80");
+  assert(validity.valid == false);
+  assert(validity.valid_upto == 0);
+
+  validity = validate_utf8("\xED\xA0\x8C");
+  assert(validity.valid == false);
+  assert(validity.valid_upto == 0);
+
+  validity = validate_utf8("\xED\xBF\xBF");
+  assert(validity.valid == false);
+  assert(validity.valid_upto == 0);
+}
+
 void test_validate_utf8_err() {
   utf8_validity validity = validate_utf8("Hello Здравствуйте\xC0\xC0 こんにちは 🚩😁");
   assert(validity.valid == false);
@@ -240,6 +260,7 @@ int ntests = 0;
 int main() {
   TEST(test_validate_utf8_ok);
   TEST(test_validate_utf8_boundary_ok);
+  TEST(test_surrogate_rejection);
   TEST(test_validate_utf8_err);
   TEST(test_validate_utf8_overlong_encoding_err);
   TEST(test_make_utf8_string_ok);
