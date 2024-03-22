@@ -1,0 +1,11 @@
+[compiler]
+name = "gcc"
+flags = ["-Wall", "-Wextra", "-Werror"]
+
+[build]
+dir = "./build"
+
+[[targets]]
+name = "test"
+source = "test.c"
+dependencies = ["utf8.c"]
