@@ -1,3 +1,31 @@
+/**
+ * @file utf8.h
+ * @brief simple library for working with UTF-8 encoded strings
+ *
+ * @code
+ * #include <stdio.h>
+ * #include "utf8.h"
+ *
+ * int main() {
+ *     const char* str = "Hello, こんにちは, Здравствуйте";
+ *     utf8_string ustr = make_utf8_string(str);
+ *     utf8_string_slice slice = make_utf8_string_slice(ustr, 2, 11);
+ *     utf8_char_iter iter = make_utf8_char_iter(ustr);
+ *
+ *     printf("string: %s\n", ustr.str);
+ *     printf("slice: %.*s\n", (int)slice.byte_len, slice.str);
+ *
+ *     utf8_char ch;
+ *     while ((ch = next_utf8_char(&iter)).byte_len > 0) {
+ *         printf("character: %.*s\t", (int)ch.byte_len, ch.str);
+ *         printf("unicode code point: U+%04X\n", unicode_code_point(ch));
+ *     }
+ *
+ *     return 0;
+ * }
+ * @endcode
+ */
+
 #ifndef ZAHASH_UTF8_H
 #define ZAHASH_UTF8_H
 
