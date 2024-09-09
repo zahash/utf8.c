@@ -1,3 +1,5 @@
+.PHONY: clean
+
 test: utf8.o test.o
 	gcc -o test utf8.o test.o
 
