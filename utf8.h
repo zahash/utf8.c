@@ -3,8 +3,8 @@
  * @brief simple library for working with UTF-8 encoded strings
  *
  * @code
- * #include <stdio.h>
  * #include "utf8.h"
+ * #include <stdio.h>
  *
  * int main() {
  *     const char* str = "Hello, こんにちは, Здравствуйте";
@@ -30,8 +30,8 @@
 #define ZAHASH_UTF8_H
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /**
  * @brief Represents the validity of a UTF-8 encoded string.

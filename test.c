@@ -1,7 +1,7 @@
 #include "utf8.h"
 
-#include <stdio.h>
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 
 // english characters are 1 byte each

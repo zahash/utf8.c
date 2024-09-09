@@ -18,8 +18,8 @@ simple C library for working with UTF-8 encoded strings
 ## 🧑‍💻 Usage example
 
 ```c
-#include <stdio.h>
 #include "utf8.h"
+#include <stdio.h>
 
 int main() {
     const char* str = "Hello, こんにちは, Здравствуйте";
