@@ -141,6 +141,10 @@ owned_utf8_string make_utf8_string_lossy(const char* str) {
     return (owned_utf8_string) { .str = buffer, .byte_len = buffer_offset };
 }
 
+utf8_string as_utf8_string(const owned_utf8_string* owned_str) {
+    return (utf8_string) { .str = owned_str->str, .byte_len = owned_str->byte_len };
+}
+
 void free_owned_utf8_string(owned_utf8_string* owned_str) {
     if (owned_str->str) {
         free(owned_str->str);

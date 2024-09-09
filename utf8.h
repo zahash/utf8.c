@@ -138,6 +138,20 @@ utf8_string make_utf8_string(const char* str);
 owned_utf8_string make_utf8_string_lossy(const char* str);
 
 /**
+ * @brief Creates the non-owning UTF-8 encoded string `utf8_string` from an `owned_utf8_string`.
+ *
+ * @details The resulting `utf8_string` will point to the same underlying string without taking ownership.
+ *          The caller must ensure the original `owned_utf8_string` remains valid as long as the reference is used.
+ *
+ * @param owned_str The owned UTF-8 string from which to create a non-owning reference.
+ * @return utf8_string A non-owning UTF-8 string reference (`utf8_string`) pointing to the same data.
+ *
+ * @note This function does not free or transfer ownership of the `owned_utf8_string`.
+ *       The caller is responsible for managing the lifetime of the owned string.
+ */
+utf8_string as_utf8_string(const owned_utf8_string* owned_str);
+
+/**
  * @brief Frees the memory allocated for an `owned_utf8_string`.
  *
  * @details The `free_owned_utf8_string` function deallocates the memory used by an `owned_utf8_string`
