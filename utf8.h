@@ -48,7 +48,7 @@ typedef struct {
 } utf8_validity;
 
 /**
- * @brief Represents a UTF-8 encoded string.
+ * @brief Represents a non-owning UTF-8 encoded string. (just a wrapper type).
  *
  * @details The `utf8_string` struct holds a pointer to a UTF-8 encoded string along with its byte length,
  */
@@ -56,6 +56,18 @@ typedef struct {
     const char* str;     ///< Pointer to the UTF-8 encoded string.
     size_t byte_len;     ///< Byte length of the UTF-8 string ('\0' not counted).
 } utf8_string;
+
+/**
+ * @brief Represents a UTF-8 encoded string that fully owns its data.
+ *
+ * @details The `owned_utf8_string` struct holds a pointer to a UTF-8 encoded string that is dynamically allocated
+ *          and therefore is owned by the struct, which means the caller is responsible for freeing the memory when
+ *          it is no longer needed using the `free_owned_utf8_string` function.
+ */
+typedef struct {
+    char* str;          ///< Pointer to the UTF-8 encoded string (owned). This memory is dynamically allocated.
+    size_t byte_len;    ///< Byte length of the UTF-8 string ('\0' not counted).
+} owned_utf8_string;
 
 /**
  * @brief Represents an iterator for traversing UTF-8 characters in a string.
@@ -104,6 +116,42 @@ utf8_validity validate_utf8(const char* str);
  * @endcode
  */
 utf8_string make_utf8_string(const char* str);
+
+/**
+ * @brief Converts a C-style string to a UTF-8 string, replacing invalid sequences with U+FFFD REPLACEMENT CHARACTER (�).
+ *
+ * @details It takes a C-style string as input and converts it to a UTF-8 encoded string.
+ *          Any invalid UTF-8 sequences in the input string are replaced with the U+FFFD REPLACEMENT CHARACTER (�) to ensure
+ *          that the resulting string is valid UTF-8. The resulting string is dynamically allocated and the caller
+ *          is responsible for freeing the memory when no longer needed using `free_owned_utf8_string`.
+ *
+ * @param str The input C-style string to convert. The string can contain invalid UTF-8 sequences.
+ * @return An `owned_utf8_string` structure containing the resulting UTF-8 string. If memory allocation fails, the structure
+ *         will contain a `NULL` pointer and a `byte_len` of 0.
+ *
+ * @code
+ * // Example usage:
+ * const char* str = "hello\xC0\xC0 world!";
+ * owned_utf8_string owned_ustr = make_utf8_string_lossy(str);
+ * @endcode
+ */
+owned_utf8_string make_utf8_string_lossy(const char* str);
+
+/**
+ * @brief Frees the memory allocated for an `owned_utf8_string`.
+ *
+ * @details The `free_owned_utf8_string` function deallocates the memory used by an `owned_utf8_string`
+ *          and sets the `str` pointer to `NULL` and `byte_len` to 0.
+ *
+ * @param owned_str A pointer to the `owned_utf8_string` structure to be freed.
+ *
+ * @code
+ * // Example usage:
+ * owned_utf8_string owned_ustr = make_utf8_string_lossy("hello\xC0\xC0 world!");
+ * free_owned_utf8_string(&owned_ustr);
+ * @endcode
+ */
+void free_owned_utf8_string(owned_utf8_string* owned_str);
 
 /**
  * @brief Creates a UTF-8 string slice from a specified range of bytes in the original string.

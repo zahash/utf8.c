@@ -123,6 +123,36 @@ void test_make_utf8_string_err() {
   assert(ustr.byte_len == 0);
 }
 
+void test_make_utf8_string_lossy_ok() {
+    const char* str = "Hello Здравствуйте こんにちは 🚩😁";
+    owned_utf8_string owned_ustr = make_utf8_string_lossy(str);
+    assert(owned_ustr.byte_len == 5 + 1 + 12 * 2 + 1 + 5 * 3 + 1 + 2 * 4);
+    assert(strcmp(owned_ustr.str, str) == 0);
+    free_owned_utf8_string(&owned_ustr);
+}
+
+void test_make_utf8_string_lossy_invalid_sequence() {
+    const char* str = "\xC0He\xC0llo Здр\xC0авствуйте\xC0\xC0 こんに\xC0\xC0\xC0\xC0ちは 🚩\xC0😁\xC0";
+    const char* expected = "�He�llo Здр�авствуйте�� こんに����ちは 🚩�😁�";
+
+    owned_utf8_string owned_ustr = make_utf8_string_lossy(str);
+
+    assert(owned_ustr.byte_len == strlen(expected));
+    assert(strcmp(owned_ustr.str, expected) == 0);
+    free_owned_utf8_string(&owned_ustr);
+}
+
+void test_make_utf8_string_lossy_completely_invalid() {
+    const char* str = "\xC0\xC0\xC0\xC0";
+    const char* expected = "����";
+
+    owned_utf8_string owned_ustr = make_utf8_string_lossy(str);
+
+    assert(owned_ustr.byte_len == strlen(expected));
+    assert(strcmp(owned_ustr.str, expected) == 0);
+    free_owned_utf8_string(&owned_ustr);
+}
+
 void test_make_utf8_string_slice_ok() {
   utf8_string str = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
   utf8_string slice = slice_utf8_string(str, 6, 24);
@@ -265,6 +295,9 @@ int main() {
   TEST(test_validate_utf8_overlong_encoding_err);
   TEST(test_make_utf8_string_ok);
   TEST(test_make_utf8_string_err);
+  TEST(test_make_utf8_string_lossy_ok);
+  TEST(test_make_utf8_string_lossy_invalid_sequence);
+  TEST(test_make_utf8_string_lossy_completely_invalid);
   TEST(test_make_utf8_string_slice_ok);
   TEST(test_make_utf8_string_slice_start_out_of_bounds_ok);
   TEST(test_make_utf8_string_slice_end_out_of_bounds_ok);

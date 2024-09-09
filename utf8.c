@@ -1,5 +1,8 @@
 #include "utf8.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 typedef struct {
     bool valid;
     size_t next_offset;
@@ -93,6 +96,57 @@ utf8_string make_utf8_string(const char* str) {
     utf8_validity validity = validate_utf8(str);
     if (validity.valid) return (utf8_string) { .str = str, .byte_len = validity.valid_upto };
     return (utf8_string) { .str = NULL, .byte_len = 0 };
+}
+
+owned_utf8_string make_utf8_string_lossy(const char* str) {
+    if (str == NULL) return (owned_utf8_string) { .str = NULL, .byte_len = 0 };
+
+    size_t len = strlen(str);
+
+    // Worst case scenario: every byte is invalid and is replaced with 3 bytes for U+FFFD
+    size_t worst_case_size = len * 3 + 1;
+
+    // Allocate buffer for the lossy UTF-8 string
+    char* buffer = (char*)malloc(worst_case_size);
+    if (!buffer) return (owned_utf8_string) { .str = NULL, .byte_len = 0 }; // failed allocation
+
+    size_t buffer_offset = 0;
+    size_t offset = 0;
+    utf8_char_validity char_validity;
+
+    while (offset < len) {
+        char_validity = validate_utf8_char(str, offset);
+
+        if (char_validity.valid) {
+            // Copy valid UTF-8 character sequence to the buffer
+            size_t char_len = char_validity.next_offset - offset;
+            memcpy(buffer + buffer_offset, str + offset, char_len);
+            buffer_offset += char_len;
+            offset = char_validity.next_offset;
+        } else {
+            // Insert the UTF-8 bytes for U+FFFD (�)
+            // FFFD = 1111111111111101
+            //      = (1111) (111111) (111101)
+            //      = 1110(1111) 10(111111) 10(111101)
+            //      = EF BF BD
+            buffer[buffer_offset++] = 0xEF;
+            buffer[buffer_offset++] = 0xBF;
+            buffer[buffer_offset++] = 0xBD;
+            offset++;
+        }
+    }
+
+    buffer[buffer_offset] = '\0';
+
+    return (owned_utf8_string) { .str = buffer, .byte_len = buffer_offset };
+}
+
+void free_owned_utf8_string(owned_utf8_string* owned_str) {
+    if (owned_str->str) {
+        free(owned_str->str);
+        owned_str->str = NULL;
+        owned_str->byte_len = 0;
+    }
 }
 
 utf8_char_iter make_utf8_char_iter(utf8_string ustr) {
