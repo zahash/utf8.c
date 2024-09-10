@@ -220,6 +220,18 @@ void test_utf8_char_iter() {
   assert(strcmp(ch.str, "") == 0);
 }
 
+void test_utf8_char_count_zero() {
+  utf8_string ustr = make_utf8_string("");
+  size_t count = utf8_char_count(ustr);
+  assert(count == 0);
+}
+
+void test_utf8_char_count() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
+  size_t count = utf8_char_count(ustr);
+  assert(count == 5 + 1 + 12 + 1 + 5 + 1 + 2);
+}
+
 void test_is_utf8_char_boundary() {
   const char* str = "Hдこ😁";
   assert(is_utf8_char_boundary(str)); //    H
@@ -304,6 +316,8 @@ int main() {
   TEST(test_make_utf8_string_slice_start_non_boundary_err);
   TEST(test_make_utf8_string_slice_end_non_boundary_err);
   TEST(test_utf8_char_iter);
+  TEST(test_utf8_char_count_zero);
+  TEST(test_utf8_char_count);
   TEST(test_is_utf8_char_boundary);
   TEST(test_nth_utf8_char_valid_index_ok);
   TEST(test_nth_utf8_char_first_index_ok);

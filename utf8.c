@@ -201,6 +201,14 @@ utf8_char nth_utf8_char(utf8_string ustr, size_t char_index) {
     return ch;
 }
 
+size_t utf8_char_count(utf8_string ustr) {
+    utf8_char_iter iter = make_utf8_char_iter(ustr);
+
+    size_t count = 0;
+    while (next_utf8_char(&iter).byte_len > 0) count++;
+    return count;
+}
+
 uint32_t unicode_code_point(utf8_char uchar) {
     switch (uchar.byte_len) {
     case 1: return uchar.str[0] & 0b01111111;

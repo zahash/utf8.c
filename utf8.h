@@ -219,6 +219,14 @@ utf8_char next_utf8_char(utf8_char_iter* iter);
 utf8_char nth_utf8_char(utf8_string ustr, size_t char_index);
 
 /**
+ * @brief Counts the number of UTF-8 characters in the given utf8_string.
+ *
+ * @param ustr The UTF-8 string whose characters are to be counted.
+ * @return The total number of characters in the UTF-8 string.
+ */
+size_t utf8_char_count(utf8_string ustr);
+
+/**
  * @brief Checks if a given byte is the start of a UTF-8 character. ('\0' is also a valid character boundary)
  *
  * @param str Pointer to the byte to check.
@@ -227,7 +235,7 @@ utf8_char nth_utf8_char(utf8_string ustr, size_t char_index);
 bool is_utf8_char_boundary(const char* str);
 
 /**
- * @brief Converts a UTF-8 character to its corresponding Unicode code point.
+ * @brief Converts a UTF-8 character to its corresponding Unicode code point (which is the same as a UTF-32 value).
  *
  * @param uchar The UTF-8 character to convert.
  * @return The Unicode code point.
