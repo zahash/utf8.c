@@ -232,6 +232,13 @@ void test_utf8_char_count() {
   assert(count == 5 + 1 + 12 + 1 + 5 + 1 + 2);
 }
 
+void test_utf8_slice_char_count() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
+  utf8_string slice = slice_utf8_string(ustr, 0, 5 + 1 + 24);
+  size_t count = utf8_char_count(slice);
+  assert(count == 5 + 1 + 12);
+}
+
 void test_is_utf8_char_boundary() {
   const char* str = "Hдこ😁";
   assert(is_utf8_char_boundary(str)); //    H
@@ -279,6 +286,14 @@ void test_nth_utf8_char_invalid_index_err() {
   assert(ch.byte_len == 0);
 }
 
+void test_slice_nth_utf8_char_invalid_index_err() {
+  utf8_string ustr = make_utf8_string("Hello Здравствуйте こんにちは 🚩😁");
+  utf8_string slice = slice_utf8_string(ustr, 0, 5 + 1 + 24);
+  utf8_char ch = nth_utf8_char(slice, 18);
+  assert(ch.str == NULL);
+  assert(ch.byte_len == 0);
+}
+
 void test_nth_utf8_char_empty_string_err() {
   utf8_string ustr = make_utf8_string("");
   utf8_char ch = nth_utf8_char(ustr, 0);
@@ -318,11 +333,13 @@ int main() {
   TEST(test_utf8_char_iter);
   TEST(test_utf8_char_count_zero);
   TEST(test_utf8_char_count);
+  TEST(test_utf8_slice_char_count);
   TEST(test_is_utf8_char_boundary);
   TEST(test_nth_utf8_char_valid_index_ok);
   TEST(test_nth_utf8_char_first_index_ok);
   TEST(test_nth_utf8_char_last_index_ok);
   TEST(test_nth_utf8_char_invalid_index_err);
+  TEST(test_slice_nth_utf8_char_invalid_index_err);
   TEST(test_nth_utf8_char_empty_string_err);
   TEST(test_unicode_code_point);
 

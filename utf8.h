@@ -76,7 +76,8 @@ typedef struct {
  * within a UTF-8 encoded string.
  */
 typedef struct {
-    const char* str;     ///< Pointer to the current position of the iterator.
+    const char* str;           ///< Pointer to the current position of the iterator.
+    const char* terminator;    ///< Pointer to the last character in the string being iterated
 } utf8_char_iter;
 
 /**

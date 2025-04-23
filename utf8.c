@@ -154,7 +154,7 @@ void free_owned_utf8_string(owned_utf8_string* owned_str) {
 }
 
 utf8_char_iter make_utf8_char_iter(utf8_string ustr) {
-    return (utf8_char_iter) { .str = ustr.str };
+    return (utf8_char_iter) { .str = ustr.str, .terminator = &ustr.str[ustr.byte_len] };
 }
 
 bool is_utf8_char_boundary(const char* str) {
@@ -174,7 +174,7 @@ utf8_string slice_utf8_string(utf8_string ustr, size_t start_byte_index, size_t 
 }
 
 utf8_char next_utf8_char(utf8_char_iter* iter) {
-    if (*iter->str == '\0') return (utf8_char) { .str = iter->str, .byte_len = 0 };
+    if (iter->str == iter->terminator) return (utf8_char) { .str = iter->str, .byte_len = 0 };
 
     // iter->str is at the current char's starting byte (char boundary).
     const char* curr_boundary = iter->str;
