@@ -99,7 +99,7 @@ utf8_string make_utf8_string(const char* str) {
 }
 
 owned_utf8_string make_utf8_string_lossy(const char* str) {
-    if (str == NULL) return (owned_utf8_string) { .str = NULL, .byte_len = 0 };
+    if (str == NULL) return (owned_utf8_string) { .str = NULL, .byte_len = 0, .capacity = 0 };
 
     size_t len = strlen(str);
 
@@ -108,7 +108,7 @@ owned_utf8_string make_utf8_string_lossy(const char* str) {
 
     // Allocate buffer for the lossy UTF-8 string
     char* buffer = (char*)malloc(worst_case_size);
-    if (!buffer) return (owned_utf8_string) { .str = NULL, .byte_len = 0 }; // failed allocation
+    if (!buffer) return (owned_utf8_string) { .str = NULL, .byte_len = 0, .capacity = 0 }; // failed allocation
 
     size_t buffer_offset = 0;
     size_t offset = 0;
@@ -138,8 +138,31 @@ owned_utf8_string make_utf8_string_lossy(const char* str) {
 
     buffer[buffer_offset] = '\0';
 
-    return (owned_utf8_string) { .str = buffer, .byte_len = buffer_offset };
+    return (owned_utf8_string) { .str = buffer, .byte_len = buffer_offset, .capacity = worst_case_size };
 }
+
+owned_utf8_string owned_string_with_capacity(size_t capacity) {
+	char* buff = (char*) malloc(capacity);
+	if (!buff) return (owned_utf8_string) { .str = NULL, .byte_len = 0, .capacity = 0 }; // failed allocation
+	return (owned_utf8_string) { .str = buff, .byte_len = 0, .capacity = capacity };
+}
+
+void owned_string_push_back(owned_utf8_string* ustr, utf8_char ch) {
+	if (ch.byte_len > (ustr->capacity - ustr->byte_len)) {
+		const size_t new_cap = (ustr->capacity*2)+ch.byte_len;
+		char* temp = (char*)realloc(ustr->str, new_cap); 
+		if (!temp) return;  // failed reallocation
+		ustr->str = temp;
+		ustr->capacity = new_cap;
+	}
+	
+	for (uint8_t i = 0; i < ch.byte_len; ++i) {
+		ustr->str[ustr->byte_len] = ch.str[i];
+		ustr->byte_len++;
+	}
+	ustr->str[ustr->byte_len] = '\0';
+}
+
 
 utf8_string as_utf8_string(const owned_utf8_string* owned_str) {
     return (utf8_string) { .str = owned_str->str, .byte_len = owned_str->byte_len };
@@ -150,6 +173,7 @@ void free_owned_utf8_string(owned_utf8_string* owned_str) {
         free(owned_str->str);
         owned_str->str = NULL;
         owned_str->byte_len = 0;
+        owned_str->capacity = 0;
     }
 }
 
