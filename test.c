@@ -131,6 +131,65 @@ void test_make_utf8_string_lossy_ok() {
     free_owned_utf8_string(&owned_ustr);
 }
 
+void test_push_back_case_0() {
+	owned_utf8_string ustr = owned_string_with_capacity(10);
+	assert(ustr.capacity == 10);
+	assert(ustr.byte_len ==  0);
+	assert(ustr.str != NULL);	
+
+	owned_string_push_back(&ustr, (utf8_char){" ",  .byte_len = 1});
+	assert(ustr.capacity == 10);
+	assert(ustr.byte_len ==  1);
+	owned_string_push_back(&ustr, (utf8_char){"ы",  .byte_len = 2});
+	assert(ustr.capacity == 10);
+	assert(ustr.byte_len ==  3);
+	owned_string_push_back(&ustr, (utf8_char){"こ", .byte_len = 3});
+	assert(ustr.capacity == 10);
+	assert(ustr.byte_len ==  6);	
+	owned_string_push_back(&ustr, (utf8_char){"😁", .byte_len = 4});
+	assert(ustr.capacity == 10);
+	assert(ustr.byte_len == 10);	
+
+	owned_string_push_back(&ustr, (utf8_char){"😁", .byte_len = 4});
+	assert(ustr.capacity == 10*2+4);// capacity*2 + byte_len
+	assert(ustr.byte_len == 14);    // capacity*2 + byte_len
+
+	free_owned_utf8_string(&ustr);
+}
+
+void test_push_back_case_1() {
+	const char* str = "Здравствуйте😁";
+
+	owned_utf8_string owned_ustr = make_utf8_string_lossy(str);
+	owned_string_push_back(&owned_ustr, (utf8_char){"🚩", .byte_len = 4});
+	assert(owned_ustr.byte_len == 12 * 2 + 4 * 2);
+	owned_string_push_back(&owned_ustr, (utf8_char){"こ", .byte_len = 3});
+	assert(owned_ustr.byte_len == 12 * 2 + 4 * 2 + 3);
+	owned_string_push_back(&owned_ustr, (utf8_char){"ы",  .byte_len = 2});
+	assert(owned_ustr.byte_len == 12 * 2 + 4 * 2 + 3 + 2);
+	owned_string_push_back(&owned_ustr, (utf8_char){"f",  .byte_len = 1});
+	assert(owned_ustr.byte_len == 12 * 2 + 4 * 2 + 3 + 2 + 1);
+
+	free_owned_utf8_string(&owned_ustr);
+}
+
+void test_push_back_case_2() {
+    const char* str = "Hello Здравствуйте 🚩😁";
+    utf8_string ustr = make_utf8_string(str);
+	size_t length = 5 + 1 + 12 * 2 + 1 + 2 * 4; 
+	assert(ustr.byte_len == length);
+	utf8_char_iter iter = make_utf8_char_iter(ustr);
+	utf8_char ch;
+	
+	owned_utf8_string owned_ustr = {0};
+	while ((ch = next_utf8_char(&iter)).byte_len > 0) {
+		owned_string_push_back(&owned_ustr, ch);	
+	}
+	assert(owned_ustr.byte_len == length);
+    free_owned_utf8_string(&owned_ustr);
+}
+
+
 void test_make_utf8_string_lossy_invalid_sequence() {
     const char* str = "\xC0He\xC0llo Здр\xC0авствуйте\xC0\xC0 こんに\xC0\xC0\xC0\xC0ちは 🚩\xC0😁\xC0";
     const char* expected = "�He�llo Здр�авствуйте�� こんに����ちは 🚩�😁�";
@@ -325,6 +384,9 @@ int main() {
   TEST(test_nth_utf8_char_invalid_index_err);
   TEST(test_nth_utf8_char_empty_string_err);
   TEST(test_unicode_code_point);
+  TEST(test_push_back_case_0);
+  TEST(test_push_back_case_1);
+  TEST(test_push_back_case_2);
 
   printf("\n** %d tests passed **\n", ntests);
   return 0;
