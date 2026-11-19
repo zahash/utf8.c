@@ -67,7 +67,7 @@ typedef struct {
 typedef struct {
     char* str;          ///< Pointer to the UTF-8 encoded string (owned). This memory is dynamically allocated.
     size_t byte_len;    ///< Byte length of the UTF-8 string ('\0' not counted).
-	size_t capacity;	///< Number of free bytes 
+	size_t capacity;	///< Total allocated buffer size, in bytes.
 } owned_utf8_string;
 
 /**
